@@ -22,5 +22,7 @@ int main()
             break;
         }
     }
+    list->free(list);
+    iterator->free(iterator);
     return 0;
 }

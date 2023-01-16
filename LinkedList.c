@@ -3,14 +3,17 @@
 
 Node *push(LinkedList *list, void *value);
 Iterator *iterator(LinkedList *list);
+void freeList(LinkedList *list);
 boolean goNext(Iterator *iterator);
 void *getValue(Iterator *iterator);
+void freeIterator(Iterator *iterator);
 
 LinkedList *initList()
 {
     LinkedList *list = (LinkedList *)malloc(sizeof(LinkedList));
     list->iterator = iterator;
     list->push = push;
+    list->free = freeList;
     list->first = (Node *)malloc(sizeof(Node));
     list->first->value = NULL;
     list->first->next = NULL;
@@ -28,14 +31,32 @@ Node *push(LinkedList *list, void *value)
     list->last = new;
     return new;
 }
+
 Iterator *iterator(LinkedList *list)
 {
     Iterator *newIterator = (Iterator *)malloc(sizeof(Iterator));
     newIterator->getValue = getValue;
     newIterator->goNext = goNext;
     newIterator->current = list->first->next;
+    newIterator->free = freeIterator;
     return newIterator;
 }
+
+void freeList(LinkedList *list)
+{
+    Node *current = list->first;
+    while (current->next != NULL)
+    {
+        Node *temp = current;
+        current = current->next;
+        free(temp->value);
+        free(temp);
+    }
+    free(current->value);
+    free(current);
+    free(list);
+}
+
 boolean goNext(Iterator *iterator)
 {
     if (iterator->current->next == NULL)
@@ -45,7 +66,13 @@ boolean goNext(Iterator *iterator)
     iterator->current = iterator->current->next;
     return TRUE;
 }
+
 void *getValue(Iterator *iterator)
 {
     return iterator->current->value;
+}
+
+void freeIterator(Iterator *iterator)
+{
+    free(iterator);
 }

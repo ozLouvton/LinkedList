@@ -26,6 +26,7 @@ struct Iterator
     Node *current;
     boolean (*goNext)(Iterator *);
     void *(*getValue)(Iterator *);
+    void (*free)(Iterator *);
 };
 
 struct LinkedList
@@ -34,6 +35,7 @@ struct LinkedList
     Node *last;
     Node *(*push)(LinkedList *list, void *value);
     Iterator *(*iterator)(LinkedList *list);
+    void (*free)(LinkedList *list);
 };
 
 LinkedList *initList();
