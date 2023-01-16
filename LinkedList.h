@@ -1,5 +1,7 @@
 #ifndef LINKED_LIST
 #define LINKED_LIST
+#include <stdlib.h>
+#include <stdio.h>
 
 #ifndef NULL
 #define NULL 0
@@ -35,7 +37,9 @@ struct LinkedList
     Node *last;
     Node *(*push)(LinkedList *list, void *value);
     Iterator *(*iterator)(LinkedList *list);
+    void (*serialize)(LinkedList *list, char *path, size_t size_of_member);
     void (*free)(LinkedList *list);
+    void (*deserialize)(LinkedList *list, char *path);
 };
 
 LinkedList *initList();

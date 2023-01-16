@@ -1,5 +1,4 @@
 #include "LinkedList.h"
-#include <stdlib.h>
 
 Node *push(LinkedList *list, void *value);
 Iterator *iterator(LinkedList *list);
@@ -7,13 +6,22 @@ void freeList(LinkedList *list);
 boolean goNext(Iterator *iterator);
 void *getValue(Iterator *iterator);
 void freeIterator(Iterator *iterator);
+void serializeList(LinkedList *list, char *path, size_t size_of_member);
+void deserializeList(LinkedList *list, char *path);
+
+void _setLinkedListFunctions(LinkedList *list)
+{
+    list->iterator = iterator;
+    list->push = push;
+    list->free = freeList;
+    list->serialize = serializeList;
+    list->deserialize = deserializeList;
+}
 
 LinkedList *initList()
 {
     LinkedList *list = (LinkedList *)malloc(sizeof(LinkedList));
-    list->iterator = iterator;
-    list->push = push;
-    list->free = freeList;
+    _setLinkedListFunctions(list);
     list->first = (Node *)malloc(sizeof(Node));
     list->first->value = NULL;
     list->first->next = NULL;
@@ -40,6 +48,42 @@ Iterator *iterator(LinkedList *list)
     newIterator->current = list->first->next;
     newIterator->free = freeIterator;
     return newIterator;
+}
+
+void serializeList(LinkedList *list, char *path, size_t size_of_member)
+{
+    FILE *fptr;
+    fptr = fopen(path, "wb");
+    fwrite(&size_of_member, sizeof(size_of_member), 1, fptr);
+    Iterator *iter = list->iterator(list);
+    while (1)
+    {
+        fwrite(iter->getValue(iter), size_of_member, 1, fptr);
+        if (!iter->goNext(iter))
+        {
+            break;
+        }
+    }
+    fclose(fptr);
+    iter->free(iter);
+}
+
+void deserializeList(LinkedList *list, char *path)
+{
+    FILE *fptr;
+    fptr = fopen(path, "rb");
+    size_t size_of_member;
+    fread(&size_of_member, sizeof(size_of_member), 1, fptr);
+    while (1)
+    {
+        void *value = malloc(size_of_member);
+        if (!fread(value, size_of_member, 1, fptr))
+        {
+            break;
+        }
+        list->push(list, value);
+    }
+    fclose(fptr);
 }
 
 void freeList(LinkedList *list)

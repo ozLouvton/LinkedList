@@ -6,23 +6,42 @@
 int main()
 {
     LinkedList *list = initList();
-    size_t stringLength = sizeof(char) * (strlen("number ") + 3);
-    for (int i = 0; i < 10; i++)
+    size_t size = sizeof(int);
+    for (int i = 3; i <= 30; i += 3)
     {
-        char *val = (char *)malloc(stringLength);
-        sprintf(val, "number %d", i);
+        int *val = (int *)malloc(size);
+        *val = i;
         list->push(list, val);
     }
     Iterator *iterator = list->iterator(list);
+    printf("Values added to the list:\n");
     while (1)
     {
-        printf("%s\n", (char *)iterator->getValue(iterator));
+        printf("%d", *((int *)iterator->getValue(iterator)));
         if (!iterator->goNext(iterator))
         {
             break;
         }
+        printf(", ");
     }
-    list->free(list);
     iterator->free(iterator);
+    list->serialize(list, "./list.bin", size);
+    list->free(list);
+
+    list = initList();
+    list->deserialize(list, "./list.bin");
+    iterator = list->iterator(list);
+    printf("\n\nDeserialized values:\n");
+    while (1)
+    {
+        printf("%d", *((int *)iterator->getValue(iterator)));
+        if (!iterator->goNext(iterator))
+        {
+            break;
+        }
+        printf(", ");
+    }
+    iterator->free(iterator);
+    list->free(list);
     return 0;
 }
